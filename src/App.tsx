@@ -1,20 +1,26 @@
-// App.tsx
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Sidebar from './components/Sidebar';
-import Dashboard from './pages/Dashboard';
+import Home from './pages/Home';
+import Upload from './pages/Upload';
+import Profile from './pages/Profile';
+import Search from './pages/Search';
 
 function App() {
   return (
     <Router>
-      <div className="">
-        <Sidebar />
-        <div className="flex-1 overflow-auto">
+      <div className="min-h-screen bg-gradient-to-br from-[#fefce8] via-[#f0f4ff] to-[#ecfdf5] dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 text-gray-800 dark:text-white font-inter">
+        {/* Global Navbar */}
+       
+
+        {/* Main content */}
+        
           <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            
+            <Route path="/" element={<Home />} />
+            <Route path="/dashboard" element={<Home />} />
+            <Route path="/upload" element={<Upload />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/explore" element={<Search />} />
           </Routes>
-        </div>
+        
       </div>
     </Router>
   );
