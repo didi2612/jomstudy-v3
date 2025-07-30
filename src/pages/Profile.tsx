@@ -221,9 +221,7 @@ export default function Profile() {
                     {saving ? "Saving..." : "Save Changes"}
                   </button>
                 </div>
-                <Link to="/" className="text-sm underline text-gray-300 ml-auto">
-                  Back to Profile
-                </Link>
+              
               </>
             ) : (
               <button
