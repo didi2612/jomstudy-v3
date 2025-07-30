@@ -69,7 +69,10 @@ useEffect(() => {
   };
 const handleToggleSaveNote = async (noteId: string) => {
   const username = Cookies.get("username");
-  if (!username) return;
+  if (!username) {
+    toast.error("You must be logged in to save notes.");
+    return;
+  }
 
   const isAlreadySaved = savedNoteIds.includes(noteId);
   const updated = isAlreadySaved
@@ -94,6 +97,7 @@ const handleToggleSaveNote = async (noteId: string) => {
     toast.error("Failed to update saved notes.");
   }
 };
+
 
   const handleSearch = async () => {
     const from = (page - 1) * perPage;
