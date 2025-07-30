@@ -187,18 +187,20 @@ export default function Profile() {
                 <p className="text-sm text-gray-400 italic">—</p>
               )}
             </div>
+{user.account_type !== "student" && (
+  <>
+    <div>
+      <p className="text-sm text-gray-400">Notes Uploaded</p>
+      <p className="text-lg font-semibold text-yellow-400">{noteCount}</p>
+    </div>
 
-            <div>
-              <p className="text-sm text-gray-400">Notes Uploaded</p>
-              <p className="text-lg font-semibold text-yellow-400">{noteCount}</p>
-            </div>
-
-            <div>
-              <p className="text-sm text-gray-400">User ID</p>
-              <p className="text-lg font-semibold text-white truncate">{user.id}</p>
-            </div>
-          </div>
-
+    <div>
+      <p className="text-sm text-gray-400">User ID</p>
+      <p className="text-lg font-semibold text-white truncate">{user.id}</p>
+    </div>
+  </>
+)}
+</div>
           <div className="flex flex-wrap gap-4 justify-between items-center pt-4">
             {isEditing ? (
               <>
@@ -236,10 +238,10 @@ export default function Profile() {
 
         <div className="flex justify-center gap-4 flex-wrap">
           <Link
-            to="/"
+            to="/explore"
             className="bg-yellow-400 hover:bg-yellow-300 text-black font-semibold px-6 py-3 rounded-xl shadow-lg transition-all duration-200"
           >
-            Home
+            Browse Notes
           </Link>
         {/* Conditionally render based on account_type */}
   {user.account_type !== "student" && (
@@ -250,14 +252,22 @@ export default function Profile() {
       >
         Upload Notes
       </Link>
+      
       <Link
         to="/myupload"
         className="bg-yellow-400 hover:bg-yellow-300 text-black font-semibold px-6 py-3 rounded-xl shadow-lg transition-all duration-200"
       >
         My Notes
       </Link>
+     
     </>
   )}
+    <Link
+        to="/mysaved"
+        className="bg-yellow-400 hover:bg-yellow-300 text-black font-semibold px-6 py-3 rounded-xl shadow-lg transition-all duration-200"
+      >
+     Saved Notes
+      </Link>
           <button
             onClick={() => {
               document.cookie = "username=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;";

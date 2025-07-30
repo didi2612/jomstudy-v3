@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation,Navigate } from 'react-router-dom';
 import Home from './pages/Home';
 import Upload from './pages/Upload';
 import Profile from './pages/Profile';
@@ -7,10 +7,13 @@ import Login from './pages/Login';
 import ProtectedRoute from './components/ProtectedRoute';
 import Sidebar from './components/Sidebar';
 import MyUploads from './pages/MyUpload';
+import Register from './pages/Register';
+import Saved from './pages/Saved';
+
 
 function AppWrapper() {
   const location = useLocation();
-  const hideSidebarPaths = ['/profile', '/azp','/upload','/myupload']; // Add more paths here if needed
+  const hideSidebarPaths = ['/profile', '/azp', '/upload', '/myupload', '/register', '/mysaved'];
   const shouldShowSidebar = !hideSidebarPaths.includes(location.pathname);
 
   return (
@@ -19,10 +22,11 @@ function AppWrapper() {
 
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/dashboard" element={<Home />} />
+       
         <Route path="/explore" element={<Search />} />
         <Route path="/azp" element={<Login />} />
-        
+        <Route path="/register" element={<Register />} />
+
         <Route
           path="/upload"
           element={
@@ -31,7 +35,15 @@ function AppWrapper() {
             </ProtectedRoute>
           }
         />
-         <Route
+        <Route
+          path="/mysaved"
+          element={
+            <ProtectedRoute>
+              <Saved />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/myupload"
           element={
             <ProtectedRoute>
@@ -47,6 +59,9 @@ function AppWrapper() {
             </ProtectedRoute>
           }
         />
+
+        {/* Catch-all route: redirect to home */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </div>
   );
