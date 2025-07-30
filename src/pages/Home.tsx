@@ -88,7 +88,7 @@ export default function Home() {
           <img
             src="https://i.pinimg.com/originals/57/3c/da/573cdaf5205bebaac51ca29273dd5514.gif"
             alt="Study girl"
-            className="relative w-full rounded-3xl shadow-xl  "
+            className="relative w-full rounded-3xl  "
           />
         </motion.div>
       </section>
