@@ -69,17 +69,25 @@ export default function Search() {
   };
 
 const handleOpenFile = async (filename: string) => {
+  const newTab = window.open("", "_blank"); // Open tab immediately
+  if (!newTab) {
+    alert("Please allow popups for this site.");
+    return;
+  }
+
   try {
     const encodedFilename = encodeURIComponent(filename);
     const res = await fetch(`https://azmiproductions.com/api/studyjom/upload.php?file=${encodedFilename}`);
     if (!res.ok) throw new Error("Failed to fetch file.");
     const blob = await res.blob();
     const fileURL = URL.createObjectURL(blob);
-    window.open(fileURL, "_blank");
+    newTab.location.href = fileURL; // Assign blob URL to opened tab
   } catch (error) {
+    newTab.close(); // Clean up failed tab
     alert("Could not open the file. Please try again later.");
   }
 };
+
 
 
   // Load query from URL on mount
