@@ -68,17 +68,19 @@ export default function Search() {
     setTotalCount(total);
   };
 
-  const handleOpenFile = async (filename: string) => {
-    try {
-      const res = await fetch(`https://azmiproductions.com/api/studyjom/upload.php?file=${filename}`);
-      if (!res.ok) throw new Error("Failed to fetch file.");
-      const blob = await res.blob();
-      const fileURL = URL.createObjectURL(blob);
-      window.open(fileURL, "_blank");
-    } catch (error) {
-      alert("Could not open the file. Please try again later.");
-    }
-  };
+const handleOpenFile = async (filename: string) => {
+  try {
+    const encodedFilename = encodeURIComponent(filename);
+    const res = await fetch(`https://azmiproductions.com/api/studyjom/upload.php?file=${encodedFilename}`);
+    if (!res.ok) throw new Error("Failed to fetch file.");
+    const blob = await res.blob();
+    const fileURL = URL.createObjectURL(blob);
+    window.open(fileURL, "_blank");
+  } catch (error) {
+    alert("Could not open the file. Please try again later.");
+  }
+};
+
 
   // Load query from URL on mount
   useEffect(() => {
