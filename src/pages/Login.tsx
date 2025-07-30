@@ -58,6 +58,9 @@ export default function Login() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               placeholder="eg. lawsoc"
+               autoCapitalize="none"
+  autoCorrect="off"
+  spellCheck="false"
             />
           </div>
           <div>
@@ -68,6 +71,9 @@ export default function Login() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
+               autoCapitalize="none"
+  autoCorrect="off"
+  spellCheck="false"
             />
           </div>
 
