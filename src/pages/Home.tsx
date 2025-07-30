@@ -14,6 +14,12 @@ const PARTNERS: Partner[] = [
     src: "https://azmiproductions.com/tempazp/img/azp.png",
     alt: "AZP",
   },
+   {
+    src: " https://cute.iium.edu.my/home/wp-content/uploads/2021/11/cutelogo5-2.png",
+    alt: "CUTE IIUM",
+  },
+
+ 
 ];
 
 const TESTIMONIALS: Testimonial[] = [
