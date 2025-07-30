@@ -153,16 +153,9 @@ export default function Profile() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div>
               <p className="text-sm text-gray-400">Username</p>
-              {isEditing ? (
-                <input
-                  type="text"
-                  value={editUsername}
-                  onChange={(e) => setEditUsername(e.target.value)}
-                  className="w-full bg-gray-700 rounded-lg p-2 mt-1 text-white"
-                />
-              ) : (
+              
                 <p className="text-lg font-semibold text-white">{user.username}</p>
-              )}
+              
             </div>
 
             <div>
