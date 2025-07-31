@@ -144,7 +144,7 @@ export default function Profile() {
             className="w-28 h-28 rounded-full border-4 border-yellow-400 shadow-md object-cover"
           />
           <h1 className="text-3xl sm:text-4xl font-extrabold text-yellow-300">
-            Welcome, {user.username} 🌟
+            Hola, {user.username} 🌟
           </h1>
           <p className="text-gray-400 text-sm sm:text-base">Your personalized study space</p>
         </div>
