@@ -60,7 +60,9 @@ const Sidebar = () => {
     <header className="bg-gradient-to-r from-gray-950 via-gray-900 to-gray-950 text-white shadow-sm fixed top-0 left-0 w-full z-50 border-b border-gray-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
         {/* Left Side: Title */}
-        <h1 className="text-lg font-bold text-yellow-400 tracking-wide">STUDY JOM</h1>
+         <Link to="/" className="text-lg font-bold text-yellow-400 tracking-wide hover:text-white">
+      STUDY JOM
+    </Link>
 
         {/* Right Side: Profile */}
         <div className="flex items-center justify-end">
