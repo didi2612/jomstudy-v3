@@ -273,7 +273,7 @@ export default function Saved() {
                     </div>
 
                     <div onClick={() => handleOpenFile(note.filename)}>
-                      <h2 className="text-lg font-semibold text-yellow-300 group-hover:underline">
+                      <h2 className="text-lg font-semibold text-yellow-300 group-hover:text-white">
                         {note.title}
                       </h2>
                       <p className="text-sm text-gray-400 mt-1">{note.subject}</p>

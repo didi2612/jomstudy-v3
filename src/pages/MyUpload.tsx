@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 
 const SUPABASE_URL = "https://pftyzswxwkheomnqzytu.supabase.co";
-const SUPABASE_API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmdHl6c3d4d2toZW9tbnF6eXR1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM3NjczNzksImV4cCI6MjA2OTM0MzM3OX0.TI9DGipYP9X8dSZSUh5CVQIbeYnf9vhNXAqw5e5ZVkk"; // Replace before using
+const SUPABASE_API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmdHl6c3d4d2toZW9tbnF6eXR1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM3NjczNzksImV4cCI6MjA2OTM0MzM3OX0.TI9DGipYP9X8dSZSUh5CVQIbeYnf9vhNXAqw5e5ZVkk"; // Replace securely
+const NOTES_PER_PAGE = 5;
 
 interface Note {
   id: number;
@@ -19,11 +20,8 @@ export default function MyUploads() {
   const [notes, setNotes] = useState<Note[]>([]);
   const [username, setUsername] = useState("");
   const [editNote, setEditNote] = useState<Note | null>(null);
-  const [editFields, setEditFields] = useState({
-    title: "",
-    subject: "",
-    tags: "",
-  });
+  const [editFields, setEditFields] = useState({ title: "", subject: "", tags: "" });
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
     const cookieUsername = document.cookie
@@ -45,15 +43,15 @@ export default function MyUploads() {
       },
     })
       .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data)) {
-          setNotes(data);
-        } else {
-          toast.error("Failed to fetch notes.");
-        }
-      })
+      .then((data) => (Array.isArray(data) ? setNotes(data) : toast.error("Failed to fetch notes.")))
       .catch(() => toast.error("Network error loading notes."));
   }, []);
+
+  const totalPages = useMemo(() => Math.max(1, Math.ceil(notes.length / NOTES_PER_PAGE)), [notes]);
+  const currentNotes = useMemo(() => {
+    const start = (page - 1) * NOTES_PER_PAGE;
+    return notes.slice(start, start + NOTES_PER_PAGE);
+  }, [notes, page]);
 
   const handleEdit = (note: Note) => {
     setEditNote(note);
@@ -66,11 +64,7 @@ export default function MyUploads() {
 
   const handleUpdate = () => {
     if (!editNote) return;
-
-    const updatedTags = editFields.tags
-      .split(",")
-      .map((t) => t.trim())
-      .filter((t) => t);
+    const updatedTags = editFields.tags.split(",").map((t) => t.trim()).filter(Boolean);
 
     fetch(`${SUPABASE_URL}/rest/v1/notes?id=eq.${editNote.id}`, {
       method: "PATCH",
@@ -80,18 +74,12 @@ export default function MyUploads() {
         Authorization: `Bearer ${SUPABASE_API_KEY}`,
         Prefer: "return=representation",
       },
-      body: JSON.stringify({
-        title: editFields.title,
-        subject: editFields.subject,
-        tags: updatedTags,
-      }),
+      body: JSON.stringify({ title: editFields.title, subject: editFields.subject, tags: updatedTags }),
     })
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) {
-          setNotes((prev) =>
-            prev.map((n) => (n.id === data[0].id ? data[0] : n))
-          );
+          setNotes((prev) => prev.map((n) => (n.id === data[0].id ? data[0] : n)));
           toast.success("Note updated.");
           setEditNote(null);
         } else {
@@ -101,12 +89,28 @@ export default function MyUploads() {
       .catch(() => toast.error("Error updating note."));
   };
 
+  const handleOpenFile = async (filename: string) => {
+    const newTab = window.open("", "_blank");
+    if (!newTab) {
+      toast("Please allow popups for this site.");
+      return;
+    }
+
+    try {
+      const res = await fetch(`https://azmiproductions.com/api/studyjom/uploads/${encodeURIComponent(filename)}`);
+      const blob = await res.blob();
+      const fileURL = URL.createObjectURL(blob);
+      newTab.location.href = fileURL;
+    } catch {
+      newTab.close();
+      toast.error("Could not open file.");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-950 text-white p-6">
       <div className="max-w-5xl mx-auto">
-        <h1 className="text-3xl font-bold mb-2 text-yellow-400">
-          📚 My Uploaded Notes
-        </h1>
+        <h1 className="text-3xl font-bold mb-2 text-yellow-400">📚 My Uploaded Notes</h1>
         <p className="text-sm text-gray-400 mb-4">Hi, {username}</p>
 
         <a
@@ -119,56 +123,73 @@ export default function MyUploads() {
         {notes.length === 0 ? (
           <p className="text-gray-300">No notes uploaded yet.</p>
         ) : (
-          <div className="grid gap-4">
-            {notes.map((note) => (
-              <motion.div
-                key={note.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-                className="p-4 bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition"
-              >
-                <div className="flex justify-between items-center mb-1">
-                  <h2 className="text-xl font-semibold text-yellow-300">
-                    {note.title}
-                  </h2>
-                  <button
-                    onClick={() => handleEdit(note)}
-                    className="text-sm px-2 py-1 bg-yellow-600 text-black rounded hover:bg-yellow-500"
-                  >
-                    ✏️ Edit
-                  </button>
-                </div>
-
-                <p className="text-sm text-gray-400">
-                  Uploaded by: {note.uploaded_by}
-                </p>
-                <p className="mt-2 text-gray-200">{note.subject}</p>
-
-                {note.tags && Array.isArray(note.tags) && (
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {note.tags.map((tag, i) => (
-                      <span
-                        key={i}
-                        className="text-xs bg-gray-700 px-2 py-1 rounded-full text-yellow-200"
-                      >
-                        #{tag}
-                      </span>
-                    ))}
-                  </div>
-                )}
-
-                <a
-                  href={`https://azmiproductions.com/api/studyjom/uploads/${note.filename}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-block mt-4 px-3 py-1 bg-yellow-600 text-black text-sm rounded hover:bg-yellow-500 transition"
+          <>
+            <div className="grid gap-4">
+              {currentNotes.map((note) => (
+                <motion.div
+                  key={note.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="p-4 bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition"
                 >
-                  View File
-                </a>
-              </motion.div>
-            ))}
-          </div>
+                  <div className="flex justify-between items-center mb-1">
+                    <h2 className="text-xl font-semibold text-yellow-300">{note.title}</h2>
+                    <button
+                      onClick={() => handleEdit(note)}
+                      className="text-sm px-2 py-1 bg-yellow-600 text-black rounded hover:bg-yellow-500"
+                    >
+                      ✏️ Edit
+                    </button>
+                  </div>
+
+                  <p className="text-sm text-gray-400">Uploaded by: {note.uploaded_by}</p>
+                  <p className="mt-2 text-gray-200">{note.subject}</p>
+
+                  {note.tags && Array.isArray(note.tags) && (
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {note.tags.map((tag, i) => (
+                        <span key={i} className="text-xs bg-gray-700 px-2 py-1 rounded-full text-yellow-200">
+                          #{tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  <button
+                    onClick={() => handleOpenFile(note.filename)}
+                    className="inline-block mt-4 px-3 py-1 bg-yellow-600 text-black text-sm rounded hover:bg-yellow-500 transition"
+                  >
+                    View File
+                  </button>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex justify-center gap-4 mt-8">
+                <button
+                  onClick={() => setPage((p) => Math.max(p - 1, 1))}
+                  disabled={page === 1}
+                  className="px-4 py-2 bg-gray-700 text-white rounded disabled:opacity-40"
+                >
+                  ← Prev
+                </button>
+                <span className="text-gray-300">
+                  Page <span className="text-yellow-400 font-bold">{page}</span> of{" "}
+                  <span className="text-yellow-400 font-bold">{totalPages}</span>
+                </span>
+                <button
+                  onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
+                  disabled={page === totalPages}
+                  className="px-4 py-2 bg-gray-700 text-white rounded disabled:opacity-40"
+                >
+                  Next →
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
 
@@ -187,35 +208,27 @@ export default function MyUploads() {
               animate={{ scale: 1 }}
               exit={{ scale: 0.8 }}
             >
-              <h2 className="text-xl font-bold mb-4 text-yellow-300">
-                Edit Note
-              </h2>
+              <h2 className="text-xl font-bold mb-4 text-yellow-300">Edit Note</h2>
               <input
                 type="text"
                 placeholder="Title"
                 className="w-full mb-3 px-3 py-2 rounded bg-gray-800 text-white"
                 value={editFields.title}
-                onChange={(e) =>
-                  setEditFields({ ...editFields, title: e.target.value })
-                }
+                onChange={(e) => setEditFields({ ...editFields, title: e.target.value })}
               />
               <textarea
-                placeholder="subject"
+                placeholder="Subject"
                 className="w-full mb-3 px-3 py-2 rounded bg-gray-800 text-white"
                 rows={4}
                 value={editFields.subject}
-                onChange={(e) =>
-                  setEditFields({ ...editFields, subject: e.target.value })
-                }
+                onChange={(e) => setEditFields({ ...editFields, subject: e.target.value })}
               />
               <input
                 type="text"
                 placeholder="Tags (comma separated)"
                 className="w-full mb-3 px-3 py-2 rounded bg-gray-800 text-white"
                 value={editFields.tags}
-                onChange={(e) =>
-                  setEditFields({ ...editFields, tags: e.target.value })
-                }
+                onChange={(e) => setEditFields({ ...editFields, tags: e.target.value })}
               />
               <div className="flex justify-end gap-2">
                 <button
