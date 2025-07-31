@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 
 type Partner = { src: string; alt: string };
@@ -14,12 +14,10 @@ const PARTNERS: Partner[] = [
     src: "https://azmiproductions.com/tempazp/img/azp.png",
     alt: "AZP",
   },
-   {
+  {
     src: " https://cute.iium.edu.my/home/wp-content/uploads/2021/11/cutelogo5-2.png",
     alt: "CUTE IIUM",
   },
-
- 
 ];
 
 const TESTIMONIALS: Testimonial[] = [
@@ -40,14 +38,44 @@ const TESTIMONIALS: Testimonial[] = [
   },
 ];
 
+const SUPABASE_URL = "https://pftyzswxwkheomnqzytu.supabase.co";
+const SUPABASE_API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmdHl6c3d4d2toZW9tbnF6eXR1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM3NjczNzksImV4cCI6MjA2OTM0MzM3OX0.TI9DGipYP9X8dSZSUh5CVQIbeYnf9vhNXAqw5e5ZVkk";
+
 export default function Home() {
   const year = new Date().getFullYear();
+  const [userCount, setUserCount] = useState<number | null>(null);
 
   const marqueeList = useMemo(() => {
     return PARTNERS.length >= 5 ? [...PARTNERS, ...PARTNERS] : PARTNERS;
   }, []);
 
   const shouldAnimate = PARTNERS.length >= 5;
+
+  useEffect(() => {
+  const fetchUserCount = async () => {
+      const res = await fetch(
+        `${SUPABASE_URL}/rest/v1/users?select=id`,
+        {
+          method: "GET",
+          headers: {
+            apikey: SUPABASE_API_KEY,
+            Authorization: `Bearer ${SUPABASE_API_KEY}`,
+            Prefer: "count=planned", // ✅ Correct header
+          },
+        }
+      );
+
+      const contentRange = res.headers.get("content-range");
+      const count = contentRange?.split("/")[1];
+      if (count) {
+        setUserCount(parseInt(count));
+      } else {
+        console.error("Could not get user count");
+      }
+    };
+
+    fetchUserCount();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-950 to-black text-white font-inter">
@@ -62,8 +90,11 @@ export default function Home() {
           <h1 className="text-5xl font-extrabold leading-tight mb-4 text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-pink-400 to-purple-500 animate-text">
             Study better, together.
           </h1>
-          <p className="text-lg text-gray-300 mb-8">
+          <p className="text-lg text-gray-300 mb-4">
             Upload your notes. Explore resources. Learn smarter with the Study Jom community.
+          </p>
+          <p className="text-pink-400 text-xl font-semibold mb-8">
+            {userCount !== null ? `🎓 ${userCount}+ students joined!` : "Loading user count..."}
           </p>
           <div className="flex flex-wrap justify-center lg:justify-start gap-4">
             <Link
@@ -72,6 +103,7 @@ export default function Home() {
             >
               Browse Notes
             </Link>
+            
           </div>
         </motion.div>
 
@@ -94,7 +126,7 @@ export default function Home() {
           <img
             src="https://i.pinimg.com/originals/57/3c/da/573cdaf5205bebaac51ca29273dd5514.gif"
             alt="Study girl"
-            className="relative w-full rounded-3xl  "
+            className="relative w-full rounded-3xl"
           />
         </motion.div>
       </section>
@@ -108,11 +140,12 @@ export default function Home() {
           className="max-w-4xl mx-auto text-center"
         >
           <h2 className="text-3xl font-bold mb-4 text-yellow-400">About Study Jom</h2>
-          <p className="text-gray-300 text-lg">
+          <p className="text-gray-300 text-lg mb-4">
             Study Jom is a cozy, student-powered platform to share notes, explore revision materials,
             and learn collaboratively. Whether you're preparing for finals or helping juniors,
             we're here to make studying less stressful and more fun.
           </p>
+          
         </motion.div>
       </section>
 
@@ -177,7 +210,6 @@ export default function Home() {
         Made with ☕ & 💡 by Study Jom team — {year}
       </footer>
 
-      {/* Inline keyframes for marquee */}
       {shouldAnimate && (
         <style>{`
           @keyframes marquee {
