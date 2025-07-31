@@ -126,7 +126,7 @@ export default function Upload() {
           />
 
           <label className="block text-sm text-gray-300 mb-1 flex items-center gap-2">
-            <FaTags className="text-indigo-400" /> Kulliyyah
+            <FaTags className="text-indigo-400" /> Tags
           </label>
           <input
             type="text"
