@@ -3,7 +3,7 @@ import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 
 const SUPABASE_URL = "https://pftyzswxwkheomnqzytu.supabase.co";
-const SUPABASE_API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmdHl6c3d4d2toZW9tbnF6eXR1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM3NjczNzksImV4cCI6MjA2OTM0MzM3OX0.TI9DGipYP9X8dSZSUh5CVQIbeYnf9vhNXAqw5e5ZVkk"; // Replace securely
+const SUPABASE_API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmdHl6c3d4d2toZW9tbnF6eXR1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM3NjczNzksImV4cCI6MjA2OTM0MzM3OX0.TI9DGipYP9X8dSZSUh5CVQIbeYnf9vhNXAqw5e5ZVkk";
 const NOTES_PER_PAGE = 5;
 
 interface Note {
@@ -22,6 +22,7 @@ export default function MyUploads() {
   const [editNote, setEditNote] = useState<Note | null>(null);
   const [editFields, setEditFields] = useState({ title: "", subject: "", tags: "" });
   const [page, setPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     const cookieUsername = document.cookie
@@ -47,11 +48,21 @@ export default function MyUploads() {
       .catch(() => toast.error("Network error loading notes."));
   }, []);
 
-  const totalPages = useMemo(() => Math.max(1, Math.ceil(notes.length / NOTES_PER_PAGE)), [notes]);
+  const filteredNotes = useMemo(() => {
+    const term = searchTerm.toLowerCase();
+    return notes.filter((note) => {
+      const titleMatch = note.title.toLowerCase().includes(term);
+      const subjectMatch = note.subject.toLowerCase().includes(term);
+      const tagMatch = (note.tags || []).some((tag) => tag.toLowerCase().includes(term));
+      return titleMatch || subjectMatch || tagMatch;
+    });
+  }, [searchTerm, notes]);
+
+  const totalPages = useMemo(() => Math.max(1, Math.ceil(filteredNotes.length / NOTES_PER_PAGE)), [filteredNotes]);
   const currentNotes = useMemo(() => {
     const start = (page - 1) * NOTES_PER_PAGE;
-    return notes.slice(start, start + NOTES_PER_PAGE);
-  }, [notes, page]);
+    return filteredNotes.slice(start, start + NOTES_PER_PAGE);
+  }, [filteredNotes, page]);
 
   const handleEdit = (note: Note) => {
     setEditNote(note);
@@ -92,18 +103,20 @@ export default function MyUploads() {
   const handleOpenFile = async (filename: string) => {
     const newTab = window.open("", "_blank");
     if (!newTab) {
-      toast("Please allow popups for this site.");
+      alert("Please allow popups for this site.");
       return;
     }
 
     try {
-      const res = await fetch(`https://azmiproductions.com/api/studyjom/uploads/${encodeURIComponent(filename)}`);
+      const encodedFilename = encodeURIComponent(filename);
+      const res = await fetch(`https://azmiproductions.com/api/studyjom/upload.php?file=${encodedFilename}`);
+      if (!res.ok) throw new Error("Failed to fetch file.");
       const blob = await res.blob();
       const fileURL = URL.createObjectURL(blob);
       newTab.location.href = fileURL;
     } catch {
       newTab.close();
-      toast.error("Could not open file.");
+      alert("Could not open the file. Please try again later.");
     }
   };
 
@@ -120,8 +133,20 @@ export default function MyUploads() {
           ← Back to Profile
         </a>
 
-        {notes.length === 0 ? (
-          <p className="text-gray-300">No notes uploaded yet.</p>
+        {/* Search Bar */}
+        <input
+          type="text"
+          placeholder="Search by title, subject, or tag..."
+          className="w-full mb-6 px-4 py-2 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+          value={searchTerm}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setPage(1);
+          }}
+        />
+
+        {filteredNotes.length === 0 ? (
+          <p className="text-gray-300">No matching notes found.</p>
         ) : (
           <>
             <div className="grid gap-4">
@@ -146,7 +171,7 @@ export default function MyUploads() {
                   <p className="text-sm text-gray-400">Uploaded by: {note.uploaded_by}</p>
                   <p className="mt-2 text-gray-200">{note.subject}</p>
 
-                  {note.tags && Array.isArray(note.tags) && (
+                  {note.tags && note.tags.length > 0 && (
                     <div className="flex flex-wrap gap-2 mt-2">
                       {note.tags.map((tag, i) => (
                         <span key={i} className="text-xs bg-gray-700 px-2 py-1 rounded-full text-yellow-200">

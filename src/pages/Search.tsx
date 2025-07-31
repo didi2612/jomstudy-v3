@@ -118,7 +118,7 @@ const handleToggleSaveNote = async (noteId: string) => {
     const encodedTags = encodeURIComponent(`{${query}}`);
 
     const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/notes?or=(title.ilike.*${query}*,subject.ilike.*${query}*,tags.cs.${encodedTags})&select=*`,
+      `${SUPABASE_URL}/rest/v1/notes?or=(title.ilike.*${query}*,subject.ilike.*${query}*,uploaded_by.ilike.*${query}*,tags.cs.${encodedTags})&select=*`,
       {
         headers: {
           apikey: SUPABASE_API_KEY,
