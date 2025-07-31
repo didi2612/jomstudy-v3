@@ -51,22 +51,35 @@ useEffect(() => {
   fetchSavedNotes();
 }, []);
 
-  const fetchLatestNotes = async () => {
-    const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/notes?select=*&order=created_at.desc&limit=6`,
-      {
-        headers: {
-          apikey: SUPABASE_API_KEY,
-          Authorization: `Bearer ${SUPABASE_API_KEY}`,
-        },
-      }
-    );
-    const data = await res.json();
-    setLatestNotes(data.map((n: any) => ({
-      ...n,
-      tags: Array.isArray(n.tags) ? n.tags : [],
-    })));
-  };
+ const fetchLatestNotes = async () => {
+  const res = await fetch(
+    `${SUPABASE_URL}/rest/v1/notes?select=*`,
+    {
+      headers: {
+        apikey: SUPABASE_API_KEY,
+        Authorization: `Bearer ${SUPABASE_API_KEY}`,
+      },
+    }
+  );
+  const data = await res.json();
+
+  const allNotes = Array.isArray(data)
+    ? data.map((n: any) => ({
+        ...n,
+        tags: Array.isArray(n.tags) ? n.tags : [],
+      }))
+    : [];
+
+  // Shuffle array using Fisher-Yates algorithm
+  for (let i = allNotes.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [allNotes[i], allNotes[j]] = [allNotes[j], allNotes[i]];
+  }
+
+  // Select first 6 notes after shuffling
+  setLatestNotes(allNotes.slice(0, 6));
+};
+
 const handleToggleSaveNote = async (noteId: string) => {
   const username = Cookies.get("username");
   if (!username) {
