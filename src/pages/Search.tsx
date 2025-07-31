@@ -266,12 +266,7 @@ const handleOpenFile = async (filename: string) => {
           >
             <FaLink />
           </button>
-          <button
-             onClick={() => navigate("/")}
-            className="bg-gray-900 hover:bg-gray-800 border border-gray-700 text-white px-5 py-4 rounded-xl font-bold shadow-md transition duration-200"
-          >
-            Home
-          </button>
+         
           
         </div>
       </div>
