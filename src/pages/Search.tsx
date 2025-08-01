@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { FaSearch, FaBookOpen, FaFilter, FaLink,FaSave,FaCheckCircle  } from "react-icons/fa";
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import toast, { Toaster } from "react-hot-toast";
 
@@ -20,7 +19,7 @@ type Note = {
 
 export default function Search() {
     const [savedNoteIds, setSavedNoteIds] = useState<string[]>([]);
-    const navigate = useNavigate();
+
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<Note[]>([]);
   const [latestNotes, setLatestNotes] = useState<Note[]>([]);
